@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3:00 PM Deadline — Harborline Outfitters Innovation Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --paper:#ECEEF0; --card:#F8F9F9; --ink:#14213D; --ink-soft:#4B5872;
+    --line:#C7CCD1; --amber:#B3651E; --red:#B3261E; --green:#2F6F4E; --focus:#2455A4;
+  }
+  *{box-sizing:border-box;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Source Serif 4', Georgia, serif; line-height:1.55; min-height:100vh; padding:32px 16px 64px; }
+  .doc{ max-width:740px; margin:0 auto; background:var(--card); border:1px solid var(--line); box-shadow:0 1px 3px rgba(20,33,61,0.08); }
+  .letterhead{ display:flex; justify-content:space-between; align-items:flex-start; padding:22px 32px; border-bottom:2px solid var(--ink); }
+  .letterhead .id{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.06em; color:var(--ink-soft); }
+  .letterhead .id .stamp{ display:block; color:var(--red); font-weight:700; margin-top:4px; }
+  .clockbox{ text-align:right; font-family:'JetBrains Mono', monospace; }
+  .clockbox .label{ font-size:10px; color:var(--ink-soft); letter-spacing:0.06em; }
+  .clockbox .time{ font-size:30px; font-weight:700; color:var(--ink); line-height:1.1; }
+  .clockbox .time.warn{ color:var(--amber); }
+  .clockbox .time.crit{ color:var(--red); }
+  .progress{ display:flex; gap:4px; padding:0 32px; margin-top:14px; }
+  .progress .seg{ flex:1; height:3px; background:var(--line); }
+  .progress .seg.done{ background:var(--ink); }
+  .progress .seg.active{ background:var(--amber); }
+  .body{ padding:32px; }
+  h1{ font-size:25px; margin:0 0 6px; font-weight:700; }
+  .kicker{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.06em; color:var(--amber); margin-bottom:10px; display:block; }
+  p{ margin:0 0 14px; color:var(--ink); }
+  .lede{ color:var(--ink-soft); font-size:16px; }
+  ul.instructions{ margin:0 0 20px; padding:0; list-style:none; }
+  ul.instructions li{ padding:10px 0 10px 30px; border-bottom:1px solid var(--line); position:relative; font-size:15px; }
+  ul.instructions li:last-child{ border-bottom:none; }
+  ul.instructions li::before{ content:"—"; position:absolute; left:0; color:var(--amber); font-weight:700; }
+  .sourcelist{ margin:0 0 18px; padding:0; list-style:none; }
+  .sourcelist li{ padding:12px 14px; border:1px solid var(--line); background:#fff; margin-bottom:8px; font-size:14px; }
+  .sourcelist .tag{ font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700; color:var(--ink); display:block; margin-bottom:4px; }
+  .pitch{ border:1px solid var(--line); background:#fff; padding:16px 18px; margin-bottom:12px; cursor:pointer; transition:border-color .15s ease, background .15s ease; }
+  .pitch:hover{ border-color:var(--ink-soft); }
+  .pitch.selected{ border-color:var(--ink); background:#F1F4F7; }
+  .pitch.locked{ cursor:default; }
+  .pitch-top{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .pitch-name{ font-weight:700; font-size:16px; }
+  .pitch-source{ font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.04em; color:var(--ink-soft); white-space:nowrap; }
+  .pitch-blurb{ font-size:14px; color:var(--ink-soft); margin-top:6px; }
+  .pitch-detail{ font-size:13px; color:var(--ink-soft); margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); display:none; }
+  .pitch-detail.open{ display:block; }
+  .learnmore{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--focus); background:none; border:none; cursor:pointer; padding:8px 0 0; text-decoration:underline; }
+  .pitch-meta{ margin-top:10px; display:flex; gap:14px; font-family:'JetBrains Mono', monospace; font-size:11px; flex-wrap:wrap; align-items:center; }
+  .pitch-meta .cost{ color:var(--ink); font-weight:700; }
+  .pitch-meta .comfort-ok{ color:var(--green); }
+  .pitch-meta .comfort-risky{ color:var(--red); font-weight:700; }
+  .pitch-meta .retention-strong{ color:var(--green); }
+  .pitch-meta .retention-weak{ color:var(--ink-soft); }
+  .pitch-meta .pilotbadge{ background:var(--ink); color:#fff; padding:2px 6px; font-weight:700; }
+  .checkmark{ width:18px; height:18px; border:2px solid var(--ink-soft); border-radius:3px; display:inline-flex; align-items:center; justify-content:center; margin-right:8px; flex-shrink:0; vertical-align:-4px; }
+  .pitch.selected .checkmark{ background:var(--ink); border-color:var(--ink); }
+  .pitch.selected .checkmark::after{ content:"✓"; color:#fff; font-size:12px; }
+  .budgetbar{ border:1px solid var(--line); background:#fff; padding:14px 18px; margin-bottom:18px; font-family:'JetBrains Mono', monospace; font-size:12px; position:sticky; top:12px; z-index:5; }
+  .budgetbar .row{ display:flex; justify-content:space-between; margin-bottom:6px; }
+  .budgetbar .track{ height:8px; background:var(--paper); border:1px solid var(--line); overflow:hidden; }
+  .budgetbar .fill{ height:100%; background:var(--green); transition:width .2s ease, background .2s ease; }
+  .budgetbar .fill.over{ background:var(--red); }
+  .budgetbar .note{ margin-top:8px; color:var(--ink-soft); font-size:11px; }
+  .budgetbar .note.warn{ color:var(--red); font-weight:700; }
+  .callout{ border-left:4px solid var(--amber); background:#fff; padding:14px 18px; margin-bottom:18px; font-size:15px; }
+  .callout.red{ border-left-color:var(--red); }
+  .callout.green{ border-left-color:var(--green); }
+  .callout .lesson{ font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.05em; color:var(--ink-soft); display:block; margin-bottom:6px; }
+  .pilotrow{ border:1px solid var(--line); border-top:none; background:#F8F9F9; padding:10px 18px; margin:-12px 0 12px; font-size:13px; display:flex; align-items:center; gap:8px; }
+  .pilotrow input{ width:16px; height:16px; }
+  .choicebar{ display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 20px; }
+  .choicebtn{ flex:1; min-width:170px; font-family:'JetBrains Mono', monospace; font-size:12px; border:1px solid var(--line); background:#fff; padding:14px; cursor:pointer; text-align:left; transition:border-color .15s ease, background .15s ease; }
+  .choicebtn:hover{ border-color:var(--ink-soft); }
+  .choicebtn.active{ border-color:var(--ink); background:#F1F4F7; }
+  .choicebtn .cbtitle{ font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:var(--ink); }
+  .choicebtn .cbnote{ color:var(--ink-soft); font-family:'Source Serif 4', Georgia, serif; font-size:12px; display:block; }
+  textarea{ width:100%; min-height:90px; font-family:'Source Serif 4', Georgia, serif; font-size:15px; padding:12px; border:1px solid var(--line); background:#fff; color:var(--ink); resize:vertical; }
+  textarea:focus, button:focus-visible, .pitch:focus-visible, .choicebtn:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+  label.qlabel{ display:block; font-weight:700; margin-bottom:8px; font-size:15px; }
+  .qblock{ margin-bottom:22px; }
+  .actions{ display:flex; justify-content:space-between; align-items:center; margin-top:24px; padding-top:20px; border-top:1px solid var(--line); flex-wrap:wrap; gap:10px; }
+  button.primary{ font-family:'JetBrains Mono', monospace; font-size:13px; letter-spacing:0.03em; background:var(--ink); color:#fff; border:none; padding:13px 22px; cursor:pointer; transition:background .15s ease; }
+  button.primary:hover{ background:#1F3155; }
+  button.primary:disabled{ background:var(--line); cursor:not-allowed; }
+  .hint{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ink-soft); }
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:fade .35s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+  .summary-row{ display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .summary-row .k{ color:var(--ink-soft); font-family:'JetBrains Mono', monospace; font-size:11px; }
+  .summary-block{ margin-bottom:18px; }
+  .videowrap{ position:relative; width:100%; max-width:380px; margin:0 auto 22px; aspect-ratio:9/16; background:#000; overflow:hidden; }
+  .videowrap iframe{ position:absolute; top:0; left:0; width:100%; height:100%; border:0; }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="letterhead">
+    <div class="id">HARBORLINE OUTFITTERS · INNOVATION COMMITTEE
+      <span class="stamp">CONFIDENTIAL — WORKING DRAFT</span></div>
+    <div class="clockbox" id="clockbox" style="display:none;">
+      <div class="label">TIME REMAINING</div>
+      <div class="time" id="clockTime">00:00</div>
+    </div>
+  </div>
+
+  <div class="progress" id="progressBar" style="display:none;">
+    <div class="seg" data-seg="1"></div><div class="seg" data-seg="2"></div><div class="seg" data-seg="3"></div><div class="seg" data-seg="4"></div>
+  </div>
+
+  <div class="body">
+
+    <!-- LANDING -->
+    <div class="screen active" data-screen="landing">
+      <span class="kicker">BEFORE YOU BEGIN</span>
+      <h1>3:00 PM Deadline</h1>
+      <p class="lede">You're the newly appointed Innovation Lead at Harborline Outfitters. The Innovation Committee meets with the CEO this afternoon. It's 10:15 AM.</p>
+      <ul class="instructions">
+        <li>First you'll read a short brief on Harborline and on where ideas come from. <strong>The clock has not started yet</strong> — take your time on those.</li>
+        <li>Then there are four timed decision rounds, about 25 minutes total. When a round's clock hits zero, the exercise <strong>moves on automatically</strong> — you can't go back.</li>
+        <li>Between rounds, new information gets revealed — those screens are untimed too. Read them; they change what a good decision looks like.</li>
+        <li>At the end, you'll answer three reflection questions. <strong>Take your time here — this is the part I care about most.</strong> Respond thoughtfully; I'm far more interested in your critical thinking than in perfect grammar.</li>
+        <li>Everything — your choices and your reflection — compiles into one PDF at the end, which you'll upload to Canvas.</li>
+        <li>Please follow the course syllabus's AI use guidelines for this assignment, including the reflection.</li>
+      </ul>
+      <div class="actions">
+        <span class="hint">Next: who is Harborline Outfitters?</span>
+        <button class="primary" onclick="goTo('brief')">Continue</button>
+      </div>
+    </div>
+
+    <!-- BRIEF -->
+    <div class="screen" data-screen="brief">
+      <span class="kicker">STILL UNTIMED</span>
+      <h1>Who is Harborline Outfitters?</h1>
+      <div class="videowrap">
+        <iframe src="https://www.youtube.com/embed/Sch2IPxV_fs" title="Harborline Outfitters — Innovation Committee Brief" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <p style="text-align:center; margin-top:-14px;"><a href="https://youtube.com/shorts/Sch2IPxV_fs" target="_blank" rel="noopener" style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--focus);">▶ If the video above doesn't load, watch it on YouTube</a></p>
+      <p>Harborline Outfitters has sold hiking, camping, and paddling gear out of the same three coastal counties for over thirty years. Twelve stores, family-owned, staffed by people who actually know the trails they're selling gear for.</p>
+      <p>That reputation isn't enough anymore. Foot traffic is down for the second straight quarter. National chains undercut Harborline on price; online retailers undercut it on convenience. Last month, a longtime regional competitor closed its last two stores — a warning sign, not a relief.</p>
+      <p>The board approved a modest innovation fund this year, mostly as a pilot: prove that a real recommendation, built the right way, can move the needle before committing more. If this quarter's pick lands, the fund likely grows next year. If it lands flat — too safe to matter, or too reckless to trust — the board may fold the innovation budget back into standard operations and not revisit it soon.</p>
+      <p><strong>You've been asked to lead this decision. What you recommend this afternoon matters more than it might look like from the outside.</strong></p>
+      <div class="actions">
+        <span class="hint">Next: a quick word on where ideas come from</span>
+        <button class="primary" onclick="goTo('sourcing')">Continue</button>
+      </div>
+    </div>
+
+    <!-- SOURCING INTRO -->
+    <div class="screen" data-screen="sourcing">
+      <span class="kicker">STILL UNTIMED</span>
+      <h1>A quick word on where ideas come from</h1>
+      <p>Every pitch on your desk this morning came from somewhere different — and where an idea comes from shapes how much people trust it, how fast it moves, and what it's missing.</p>
+      <p>You'll see each pitch tagged with one of four sources:</p>
+      <ul class="sourcelist">
+        <li><span class="tag">INTERNAL</span>From staff or managers already inside Harborline.</li>
+        <li><span class="tag">EXTERNAL / EXPERT</span>From consultants, industry reports, or benchmarking data.</li>
+        <li><span class="tag">CUSTOMER / COMMUNITY</span>From surveys, direct feedback, or the people Harborline actually serves.</li>
+        <li><span class="tag">OPEN INNOVATION</span>From unconventional, informal channels — like a suggestion box — that don't come through normal reporting lines.</li>
+      </ul>
+      <p>None of these sources is automatically "better." Each comes with its own blind spots. Keep half an eye on where your picks are coming from as you go — you'll be asked about it later.</p>
+      <div class="actions">
+        <span class="hint">Round 1 starts on the next screen — the clock begins there</span>
+        <button class="primary" onclick="goTo('round1')">Begin Round 1</button>
+      </div>
+    </div>
+
+    <!-- ROUND 1: INITIAL SELECTION -->
+    <div class="screen" data-screen="round1">
+      <span class="kicker">ROUND 1 OF 4</span>
+      <h1>Six pitches, one budget</h1>
+      <p class="lede">This quarter's innovation budget is <strong>$20,000</strong>. Select whichever combination of ideas you'd want to move forward — as many or as few as fit.</p>
+      <div class="budgetbar">
+        <div class="row"><span>Budget used</span><span id="r1BudgetFig">$0 / $20,000</span></div>
+        <div class="track"><div class="fill" id="r1BudgetFill" style="width:0%"></div></div>
+        <div class="note" id="r1BudgetNote">Select any combination below.</div>
+      </div>
+      <div id="r1pitches"></div>
+      <div class="actions">
+        <span class="hint">Continue unlocks once you're at or under budget</span>
+        <button class="primary" id="r1lockbtn" onclick="lockRound1()" disabled>Lock in selections &amp; continue</button>
+      </div>
+    </div>
+
+    <!-- ROUND 2: CULTURE REVIEW -->
+    <div class="screen" data-screen="round2">
+      <span class="kicker">ROUND 2 OF 4 — LEADERSHIP CULTURE REVIEW</span>
+      <h1 id="r2headline">Leadership reacts</h1>
+      <div class="callout red" id="r2narrative"></div>
+      <p class="lede">Decide, deliberately, how to handle it — then confirm the rest of your list still holds.</p>
+      <div class="budgetbar">
+        <div class="row"><span>Budget used</span><span id="r2BudgetFig">$0 / $20,000</span></div>
+        <div class="track"><div class="fill" id="r2BudgetFill" style="width:0%"></div></div>
+        <div class="note" id="r2BudgetNote">—</div>
+      </div>
+      <div id="r2pitches"></div>
+      <div class="actions">
+        <span class="hint">Continue unlocks once you're at or under budget</span>
+        <button class="primary" id="r2lockbtn" onclick="lockRound2()" disabled>Confirm &amp; continue</button>
+      </div>
+    </div>
+
+    <!-- REVEAL A: BUDGET CUT + CULTURE CONSEQUENCE -->
+    <div class="screen" data-screen="revealA">
+      <span class="kicker">NEW INFORMATION</span>
+      <h1>The budget just shrank</h1>
+      <div class="callout" id="cultureConsequence"></div>
+      <div class="callout red">
+        <span class="lesson">RESOURCE CONSTRAINT</span>
+        Leadership just approved emergency funding for a store renovation. Your innovation budget for this decision just dropped to <strong>$9,000</strong>. Money spent elsewhere is money that isn't available to you — that's a constraint as real as any pitch's quality.
+      </div>
+      <div id="r2recap"></div>
+      <div class="actions">
+        <span class="hint">Untimed — continue when ready</span>
+        <button class="primary" onclick="goTo('round3')">Continue to Round 3</button>
+      </div>
+    </div>
+
+    <!-- ROUND 3: TRIM TO $9,000 -->
+    <div class="screen" data-screen="round3">
+      <span class="kicker">ROUND 3 OF 4</span>
+      <h1>Cut your list to fit $9,000</h1>
+      <p class="lede">Trim what's left down to fit the new budget.</p>
+      <div class="budgetbar">
+        <div class="row"><span>Budget used</span><span id="r3BudgetFig">$0 / $9,000</span></div>
+        <div class="track"><div class="fill" id="r3BudgetFill" style="width:0%"></div></div>
+        <div class="note" id="r3BudgetNote">Uncheck items to fit the new cap.</div>
+      </div>
+      <div id="r3pitches"></div>
+      <div class="actions">
+        <span class="hint">Continue unlocks once you're at or under budget, with at least one idea left</span>
+        <button class="primary" id="r3lockbtn" onclick="lockRound3()" disabled>Lock in final list &amp; continue</button>
+      </div>
+    </div>
+
+    <!-- REVEAL B: MANDATE + TIME -->
+    <div class="screen" data-screen="revealB">
+      <span class="kicker">NEW INFORMATION</span>
+      <h1>Two more things just changed</h1>
+      <div class="callout red">
+        <span class="lesson">MANDATE + TIME CONSTRAINT</span>
+        In the pre-meeting huddle, the CEO says next year's top strategic priority is <strong>customer retention</strong> — not internal efficiency, not employee experience. And the meeting itself just got moved up. You have less time than you thought to make the final call.
+      </div>
+      <div class="actions">
+        <span class="hint">Untimed — continue when ready</span>
+        <button class="primary" onclick="goTo('round4')">Continue to Round 4 — the final call</button>
+      </div>
+    </div>
+
+    <!-- ROUND 4: FINAL CALL -->
+    <div class="screen" data-screen="round4">
+      <span class="kicker">ROUND 4 OF 4 — FINAL CALL</span>
+      <h1>Pick one, and defend it</h1>
+      <p class="lede">The committee meets in minutes. Choose your single recommendation from what survived, and write the rationale you'd actually say out loud.</p>
+      <div id="r4pitches"></div>
+      <div class="qblock">
+        <label class="qlabel" for="rationale">In 2–3 sentences: why this idea — right now, given the budget, the culture reaction, and the CEO's priority?</label>
+        <textarea id="rationale" placeholder="Type your rationale here before time runs out..."></textarea>
+      </div>
+      <div class="actions">
+        <span class="hint">Your rationale saves as written so far when time runs out</span>
+        <button class="primary" onclick="lockRound4()">Submit recommendation</button>
+      </div>
+    </div>
+
+    <!-- REFLECTION -->
+    <div class="screen" data-screen="reflection">
+      <span class="kicker">UNTIMED — TAKE YOUR TIME</span>
+      <h1>Reflection</h1>
+      <p class="lede">The clock is off. This is the part I care about most — answer thoughtfully and in as much detail as you need.</p>
+      <div class="qblock">
+        <label class="qlabel" for="q1">1. Your list moved across four rounds. Which idea-sourcing category (internal, external/expert, customer/community, or open innovation) survived, and which got cut along the way? Why do you think that happened?</label>
+        <textarea id="q1"></textarea>
+      </div>
+      <div class="qblock">
+        <label class="qlabel" for="q2">2. This exercise built in four real constraints: a budget cut, a culture/comfort reaction, a leadership mandate, and a shrinking clock. Which one changed your thinking the most, and why?</label>
+        <textarea id="q2"></textarea>
+      </div>
+      <div class="qblock">
+        <label class="qlabel" for="q3">3. How might these lessons apply to how the OGL program should source and select its own improvement ideas?</label>
+        <textarea id="q3"></textarea>
+      </div>
+      <div class="actions">
+        <span class="hint">Next: review &amp; download your results</span>
+        <button class="primary" onclick="goTo('summary')">Review my results</button>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="screen" data-screen="summary">
+      <span class="kicker">COMPLETE</span>
+      <h1>Your results</h1>
+      <p class="lede">Review below, then download as a PDF and upload it to Canvas.</p>
+      <div class="summary-block">
+        <div class="summary-row"><span class="k">ROUND 1 — INITIAL LIST</span><span id="sumR1">—</span></div>
+        <div class="summary-row"><span class="k">ROUND 2 — AFTER CULTURE REVIEW</span><span id="sumR2">—</span></div>
+        <div class="summary-row"><span class="k">ROUND 3 — TRIMMED TO $9,000</span><span id="sumR3">—</span></div>
+        <div class="summary-row"><span class="k">ROUND 4 — FINAL RECOMMENDATION</span><span id="sumR4">—</span></div>
+      </div>
+      <p id="sumRationale" style="font-style:italic; color:var(--ink-soft);"></p>
+      <div class="summary-block" style="margin-top:20px;">
+        <div class="summary-row"><span class="k">REFLECTION 1</span><span></span></div>
+        <p id="sumQ1" style="color:var(--ink-soft);"></p>
+        <div class="summary-row"><span class="k">REFLECTION 2</span><span></span></div>
+        <p id="sumQ2" style="color:var(--ink-soft);"></p>
+        <div class="summary-row"><span class="k">REFLECTION 3</span><span></span></div>
+        <p id="sumQ3" style="color:var(--ink-soft);"></p>
+      </div>
+      <div class="actions">
+        <span class="hint">This prototype downloads a plain PDF for testing</span>
+        <button class="primary" onclick="downloadPDF()">Download as PDF</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const IDEAS = {
+  kiosk:    { name:"Self-Service Kiosks", cat:"INTERNAL — OPS TEAM",
+    blurb:"Add self-checkout kiosks to reduce line waits during weekend rushes.",
+    detail:"Ops has been asking for this for two years — line complaints spike every Saturday. Installation takes about six weeks per store and needs minimal staff retraining. It solves a real friction point but doesn't change how customers feel about Harborline, just how fast they get through it.",
+    cost:9000, comfort:"comfortable", retention:"weak" },
+  ai:       { name:"AI-Powered Customer Support", cat:"EXTERNAL — CONSULTANT",
+    blurb:"24/7 AI chat and voice support to cover after-hours questions and returns.",
+    detail:"A consulting firm pitched this after seeing it work for a national chain three times Harborline's size. It would eliminate after-hours wait times entirely, but the licensing and setup cost is the single biggest line item on the table — choosing it means betting almost the entire quarter's budget on one initiative, with little left over for anything else.",
+    cost:18500, comfort:"comfortable", retention:"strong" },
+  hours:    { name:"Extended Store Hours", cat:"CUSTOMER — SURVEY DATA",
+    blurb:"Open one hour earlier and two hours later on weekends, matching the #1 complaint in this quarter's customer survey.",
+    detail:"412 survey respondents specifically named store hours as their biggest frustration — more than any other issue. Cost covers additional part-time staffing hours only; no new systems or training required.",
+    cost:2500, comfort:"comfortable", retention:"strong" },
+  loyalty:  { name:"Loyalty Program Overhaul", cat:"EXPERT — INDUSTRY BENCHMARK",
+    blurb:"Modernize the decade-old punch-card loyalty program to match what competitors already offer.",
+    detail:"An industry benchmarking report flagged Harborline's loyalty program as the least competitive in its region — still paper punch cards while national chains run app-based tiered rewards. Cost covers a third-party platform license and staff training.",
+    cost:11000, comfort:"comfortable", retention:"strong" },
+  schedule: { name:"Employee Scheduling App", cat:"INTERNAL — FRONTLINE MANAGER",
+    blurb:"Give store managers a modern scheduling tool after a spike in front-line staff turnover.",
+    detail:"Exit interviews this year repeatedly mention unpredictable scheduling as a reason for leaving. A manager pushed this pitch up urgently after losing three experienced staff in one month. It's an employee-facing fix, not a customer-facing one.",
+    cost:6500, comfort:"comfortable", retention:"weak" },
+  swap:     { name:"Gear Swap Pop-Up Collective", cat:"OPEN INNOVATION — SUGGESTION BOX",
+    blurb:"A rotating in-store space where local outdoor clubs and gear makers can sell and swap used equipment alongside Harborline's own inventory.",
+    detail:"This came from a part-time sales associate's suggestion-box card, not a manager or consultant. It plays directly to what Harborline has that big chains don't — deep community ties — but it means giving shelf space to non-Harborline products and trusting an untested partnership model. No one on the leadership team has approved anything like it before.",
+    cost:4000, pilotCost:2000, comfort:"risky", retention:"strong" }
+};
+const ALL_KEYS = Object.keys(IDEAS);
+const ROUND1_CAP = 20000;
+const ROUND3_CAP = 9000;
+
+let state = {
+  r1selected: new Set(),
+  r1autoNote: "",
+  r2working: new Set(),      // live selection during round 2 (culture review)
+  r2selected: new Set(),     // locked after round 2
+  swapPilot: false,
+  r2autoNote: "",
+  r3selected: new Set(),
+  r3autoNote: "",
+  finalPick: null,
+  roundsDone: 0
+};
+let timerInterval = null;
+
+const ROUND_SCREENS = { round1:1, round2:2, round3:3, round4:4 };
+
+function costOf(key){ return (key==='swap' && state.swapPilot) ? IDEAS.swap.pilotCost : IDEAS[key].cost; }
+function comfortOf(key){ return (key==='swap' && state.swapPilot) ? 'comfortable' : IDEAS[key].comfort; }
+function retentionOf(key){ return (key==='swap' && state.swapPilot) ? 'weak' : IDEAS[key].retention; }
+function displayName(key){ return IDEAS[key].name + ((key==='swap' && state.swapPilot) ? ' (2-store pilot)' : ''); }
+function fmt(n){ return '$'+n.toLocaleString(); }
+
+function setProgress(screenKey){
+  const bar = document.getElementById('progressBar');
+  const clockbox = document.getElementById('clockbox');
+  bar.style.display = (screenKey==='landing') ? 'none' : 'flex';
+  clockbox.style.display = ROUND_SCREENS[screenKey] ? 'block' : 'none';
+  document.querySelectorAll('.seg').forEach(seg=>{
+    const n = parseInt(seg.dataset.seg,10);
+    seg.classList.remove('done','active');
+    if(state.roundsDone >= n) seg.classList.add('done');
+    if(ROUND_SCREENS[screenKey]===n) seg.classList.add('active');
+  });
+}
+
+function goTo(screenKey){
+  clearInterval(timerInterval);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelector('[data-screen="'+screenKey+'"]').classList.add('active');
+  setProgress(screenKey);
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  if(screenKey==='round1'){ renderRound1(); startTimer(9*60, ()=>lockRound1(true)); }
+  if(screenKey==='round2'){ renderRound2(); startTimer(6*60, ()=>lockRound2(true)); }
+  if(screenKey==='revealA'){ renderRevealA(); }
+  if(screenKey==='round3'){ renderRound3(); startTimer(6*60, ()=>lockRound3(true)); }
+  if(screenKey==='round4'){ renderRound4(); startTimer(4*60, ()=>lockRound4(true)); }
+  if(screenKey==='summary'){ renderSummary(); }
+}
+
+function startTimer(seconds, onExpire){
+  let remaining = seconds;
+  const el = document.getElementById('clockTime');
+  update();
+  timerInterval = setInterval(()=>{
+    remaining--; update();
+    if(remaining<=0){ clearInterval(timerInterval); onExpire(); }
+  },1000);
+  function update(){
+    const m = Math.floor(remaining/60).toString().padStart(2,'0');
+    const s = (remaining%60).toString().padStart(2,'0');
+    el.textContent = m+':'+s;
+    el.classList.remove('warn','crit');
+    if(remaining<=60) el.classList.add('crit');
+    else if(remaining<=Math.min(120, seconds*0.34)) el.classList.add('warn');
+  }
+}
+
+function pitchCard(key, opts){
+  const idea = IDEAS[key];
+  const div = document.createElement('div');
+  const selected = opts.isSelected(key);
+  div.className = 'pitch' + (selected?' selected':'') + (opts.locked?' locked':'');
+  div.tabIndex = 0;
+  const comfortHtml = opts.showComfort
+    ? `<span class="${comfortOf(key)==='risky'?'comfort-risky':'comfort-ok'}">${comfortOf(key)==='risky'?'Outside comfort zone':'Comfortable fit'}</span>`
+    : '';
+  const retentionHtml = opts.showRetention
+    ? `<span class="${retentionOf(key)==='strong'?'retention-strong':'retention-weak'}">Retention: ${retentionOf(key)}</span>`
+    : '';
+  const pilotBadge = (key==='swap' && state.swapPilot) ? `<span class="pilotbadge">PILOT SCOPE</span>` : '';
+  div.innerHTML = `
+    <div class="pitch-top">
+      <span class="pitch-name"><span class="checkmark"></span>${displayName(key)}</span>
+      <span class="pitch-source">${idea.cat}</span>
+    </div>
+    <div class="pitch-blurb">${idea.blurb}</div>
+    <div class="pitch-meta">
+      <span class="cost">${fmt(costOf(key))}</span>
+      ${comfortHtml} ${retentionHtml} ${pilotBadge}
+    </div>
+    <button class="learnmore" type="button">Learn more</button>
+    <div class="pitch-detail">${idea.detail}</div>
+  `;
+  div.querySelector('.learnmore').onclick = (e)=>{
+    e.stopPropagation();
+    const detail = div.querySelector('.pitch-detail');
+    const open = detail.classList.toggle('open');
+    e.target.textContent = open ? 'Show less' : 'Learn more';
+  };
+  if(!opts.locked){ div.addEventListener('click', ()=>opts.onToggle(key, div)); }
+  return div;
+}
+
+function budgetUI(prefix, selectedSet, cap, lockBtnId, requireOne){
+  const total = [...selectedSet].reduce((s,k)=>s+costOf(k),0);
+  const fill = document.getElementById(prefix+'Fill');
+  const fig = document.getElementById(prefix+'Fig');
+  const note = document.getElementById(prefix+'Note');
+  const btn = document.getElementById(lockBtnId);
+  const pct = Math.min(100,(total/cap)*100);
+  fig.textContent = fmt(total)+' / '+fmt(cap);
+  fill.style.width = pct+'%';
+  const over = total > cap;
+  fill.classList.toggle('over', over);
+  note.classList.toggle('warn', over);
+  if(over) note.textContent = 'Over budget by '+fmt(total-cap)+'. Adjust your selections to continue.';
+  else if(total===0 && requireOne) note.textContent = 'Select at least one idea.';
+  else note.textContent = 'Within budget — continue when ready, or keep adjusting.';
+  btn.disabled = over || (requireOne && total===0);
+  return total;
+}
+
+// ---------- ROUND 1 ----------
+function renderRound1(){
+  const wrap = document.getElementById('r1pitches');
+  wrap.innerHTML = '';
+  ALL_KEYS.forEach(key=>{
+    wrap.appendChild(pitchCard(key, {
+      isSelected:(k)=>state.r1selected.has(k),
+      showComfort:false, showRetention:false,
+      onToggle:(k)=>{
+        if(state.r1selected.has(k)) state.r1selected.delete(k); else state.r1selected.add(k);
+        renderRound1();
+      }
+    }));
+  });
+  budgetUI('r1Budget', state.r1selected, ROUND1_CAP, 'r1lockbtn', true);
+}
+function lockRound1(expired){
+  if(expired){
+    let total = [...state.r1selected].reduce((s,k)=>s+costOf(k),0);
+    if(state.r1selected.size===0){
+      state.r1selected.add('hours');
+      state.r1autoNote = "Time ran out before you selected anything — Extended Store Hours (the lowest-cost option) was carried forward by default.";
+    } else if(total > ROUND1_CAP){
+      const removed = [];
+      while(total > ROUND1_CAP){
+        const priciest = [...state.r1selected].sort((a,b)=>costOf(b)-costOf(a))[0];
+        state.r1selected.delete(priciest); removed.push(IDEAS[priciest].name);
+        total = [...state.r1selected].reduce((s,k)=>s+costOf(k),0);
+      }
+      state.r1autoNote = "Time ran out while you were still over budget — "+removed.join(', ')+" got cut automatically to fit the cap.";
+    }
+  }
+  state.roundsDone = Math.max(state.roundsDone,1);
+  goTo('round2');
+}
+
+// ---------- ROUND 2: CULTURE REVIEW ----------
+function renderRound2(){
+  const hasSwap = state.r1selected.has('swap');
+  document.getElementById('r2headline').textContent = hasSwap ? 'Leadership reacts to Gear Swap Pop-Up Collective' : 'One more idea, before you finalize';
+  document.getElementById('r2narrative').innerHTML = hasSwap
+    ? `<span class="lesson">CULTURE CONSTRAINT</span> In the leadership meeting, the Operations VP pushes back: "We don't have a process for vetting outside partners, and if a swap partner's gear breaks or a customer gets hurt, that liability sits with us." The Marketing Director disagrees: "This is exactly what makes us different from the chains. If we water it down to nothing, why pitch it at all?"`
+    : `<span class="lesson">CULTURE CONSTRAINT</span> Before you finalize anything, one committee member asks: "Is there really nothing here that gives us an edge the big chains don't have?" Someone slides a suggestion-box pitch back across the table: Gear Swap Pop-Up Collective. You don't have to include it — but you have to decide, on purpose, whether to leave it out.`;
+
+  if(state.r2working.size===0){ state.r1selected.forEach(k=>state.r2working.add(k)); }
+  const pool = new Set([...state.r1selected, 'swap']);
+  const wrap = document.getElementById('r2pitches');
+  wrap.innerHTML = '';
+  [...pool].forEach(key=>{
+    wrap.appendChild(pitchCard(key, {
+      isSelected:(k)=>state.r2working.has(k),
+      showComfort:true, showRetention:false,
+      onToggle:(k)=>{
+        if(state.r2working.has(k)) state.r2working.delete(k); else state.r2working.add(k);
+        renderRound2();
+      }
+    }));
+    if(key==='swap' && state.r2working.has('swap')){
+      const row = document.createElement('div');
+      row.className = 'pilotrow';
+      row.innerHTML = `<input type="checkbox" id="pilotToggle" ${state.swapPilot?'checked':''}>
+        <label for="pilotToggle">Scale to a 2-store pilot instead of chain-wide — cuts cost to $2,000, but also cuts reach and how bold it reads.</label>`;
+      row.querySelector('input').onchange = (e)=>{ state.swapPilot = e.target.checked; renderRound2(); };
+      wrap.appendChild(row);
+    }
+  });
+  budgetUI('r2Budget', state.r2working, ROUND1_CAP, 'r2lockbtn', true);
+}
+function lockRound2(expired){
+  if(expired){
+    let total = [...state.r2working].reduce((s,k)=>s+costOf(k),0);
+    if(total > ROUND1_CAP){
+      const removed = [];
+      while(total > ROUND1_CAP){
+        const priciest = [...state.r2working].sort((a,b)=>costOf(b)-costOf(a))[0];
+        state.r2working.delete(priciest); removed.push(IDEAS[priciest].name);
+        total = [...state.r2working].reduce((s,k)=>s+costOf(k),0);
+      }
+      state.r2autoNote = "Time ran out while you were still over budget — "+removed.join(', ')+" got cut automatically.";
+    }
+    if(state.r2working.size===0){ state.r2working.add('hours'); }
+  }
+  state.r2selected = new Set(state.r2working);
+  state.roundsDone = Math.max(state.roundsDone,2);
+  goTo('revealA');
+}
+function renderRevealA(){
+  const box = document.getElementById('cultureConsequence');
+  const wasInR1 = state.r1selected.has('swap');
+  const inR2 = state.r2selected.has('swap');
+  let text = '';
+  if(!wasInR1 && !inR2) text = "You chose to leave Gear Swap Pop-Up Collective off the table entirely, both times it came up. Sometimes the safest political choice is not to spend capital defending something unconventional — but notice: it never got a chance to prove itself either.";
+  else if(!wasInR1 && inR2 && !state.swapPilot) text = "You changed your mind and brought Gear Swap Pop-Up Collective back in at full scale after hearing the pushback — a deliberate, costed decision, not a default.";
+  else if(!wasInR1 && inR2 && state.swapPilot) text = "You brought Gear Swap Pop-Up Collective back in, but scaled it to a 2-store pilot — a hedge: smaller cultural risk, smaller signal.";
+  else if(wasInR1 && inR2 && !state.swapPilot) text = "You kept Gear Swap Pop-Up Collective at full scale despite the pushback. That's a real bet — you'll need to answer the liability question directly when you make your final case.";
+  else if(wasInR1 && inR2 && state.swapPilot) text = "You scaled Gear Swap Pop-Up Collective down to a 2-store pilot in response to the pushback — a smaller ask that's easier for leadership to accept, but also a smaller test of whether the idea actually works.";
+  else if(wasInR1 && !inR2) text = "You dropped Gear Swap Pop-Up Collective after hearing the pushback. That's a legitimate call — but it's worth asking honestly whether you dropped it because the idea was weak, or because defending it felt like more trouble than it was worth.";
+  box.innerHTML = `<span class="lesson">CULTURE CONSTRAINT — WHAT YOUR CHOICE MEANT</span>${text}`;
+
+  const recap = document.getElementById('r2recap');
+  let html = '';
+  if(state.r1autoNote) html += `<div class="callout"><span class="lesson">TIME RAN OUT — ROUND 1</span>${state.r1autoNote}</div>`;
+  if(state.r2autoNote) html += `<div class="callout"><span class="lesson">TIME RAN OUT — ROUND 2</span>${state.r2autoNote}</div>`;
+  const total = [...state.r2selected].reduce((s,k)=>s+costOf(k),0);
+  html += '<p><strong>Your list carries forward:</strong></p>';
+  html += [...state.r2selected].map(k=>`<div class="pitch-meta"><span>${displayName(k)}</span><span class="cost">${fmt(costOf(k))}</span></div>`).join('');
+  html += `<p style="margin-top:10px;">Total: <strong>${fmt(total)}</strong> — now needs to fit inside the new $9,000 cap.</p>`;
+  recap.innerHTML = html;
+}
+
+// ---------- ROUND 3: TRIM TO $9,000 ----------
+function renderRound3(){
+  if(state.r3selected.size===0){ state.r2selected.forEach(k=>state.r3selected.add(k)); }
+  const wrap = document.getElementById('r3pitches');
+  wrap.innerHTML = '';
+  [...state.r2selected].forEach(key=>{
+    wrap.appendChild(pitchCard(key, {
+      isSelected:(k)=>state.r3selected.has(k),
+      showComfort:true, showRetention:false,
+      onToggle:(k)=>{
+        if(state.r3selected.has(k)) state.r3selected.delete(k); else state.r3selected.add(k);
+        renderRound3();
+      }
+    }));
+  });
+  budgetUI('r3Budget', state.r3selected, ROUND3_CAP, 'r3lockbtn', true);
+}
+function lockRound3(expired){
+  if(expired){
+    let total = [...state.r3selected].reduce((s,k)=>s+costOf(k),0);
+    if(total > ROUND3_CAP){
+      const removed = [];
+      while(total > ROUND3_CAP && state.r3selected.size>1){
+        const priciest = [...state.r3selected].sort((a,b)=>costOf(b)-costOf(a))[0];
+        state.r3selected.delete(priciest); removed.push(IDEAS[priciest].name);
+        total = [...state.r3selected].reduce((s,k)=>s+costOf(k),0);
+      }
+      state.r3autoNote = "Time ran out while you were still over budget — "+removed.join(', ')+" got cut automatically to fit the cap.";
+    }
+    if(state.r3selected.size===0){
+      const cheapest = [...state.r2selected].sort((a,b)=>costOf(a)-costOf(b))[0];
+      state.r3selected.add(cheapest);
+    }
+  }
+  state.roundsDone = Math.max(state.roundsDone,3);
+  goTo('revealB');
+}
+
+// ---------- ROUND 4: FINAL CALL ----------
+function renderRound4(){
+  const wrap = document.getElementById('r4pitches');
+  wrap.innerHTML = '';
+  [...state.r3selected].forEach(key=>{
+    wrap.appendChild(pitchCard(key, {
+      isSelected:(k)=>state.finalPick===k,
+      showComfort:true, showRetention:true,
+      onToggle:(k)=>{ state.finalPick = k; renderRound4(); }
+    }));
+  });
+}
+function lockRound4(expired){
+  if(!state.finalPick){ state.finalPick = [...state.r3selected][0]; }
+  state.roundsDone = 4;
+  goTo('reflection');
+}
+
+// ---------- SUMMARY ----------
+function renderSummary(){
+  document.getElementById('sumR1').textContent = [...state.r1selected].map(k=>IDEAS[k].name).join(', ') || '—';
+  document.getElementById('sumR2').textContent = [...state.r2selected].map(k=>displayName(k)).join(', ') || '—';
+  document.getElementById('sumR3').textContent = [...state.r3selected].map(k=>displayName(k)).join(', ') || '—';
+  document.getElementById('sumR4').textContent = state.finalPick ? displayName(state.finalPick) : '—';
+  document.getElementById('sumRationale').textContent = document.getElementById('rationale').value || '(no rationale entered)';
+  document.getElementById('sumQ1').textContent = document.getElementById('q1').value || '(no response)';
+  document.getElementById('sumQ2').textContent = document.getElementById('q2').value || '(no response)';
+  document.getElementById('sumQ3').textContent = document.getElementById('q3').value || '(no response)';
+}
+
+// ---------- PDF ----------
+function downloadPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'letter'});
+  const marginX = 56; let y = 64; const maxW = 500;
+  function heading(t){ doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.text(t, marginX, y); y+=20; }
+  function label(t){ doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text(t, marginX, y); y+=14; }
+  function body(t){
+    doc.setFont('helvetica','normal'); doc.setFontSize(11);
+    const lines = doc.splitTextToSize(t || '(no response)', maxW);
+    doc.text(lines, marginX, y); y += lines.length*14 + 12;
+    if(y>700){ doc.addPage(); y=64; }
+  }
+  doc.setFont('helvetica','bold'); doc.setFontSize(18);
+  doc.text('OGL Idea Triage — 3:00 PM Deadline', marginX, y); y+=26;
+
+  heading('Round 1 — Initial List (within $20,000)');
+  body([...state.r1selected].map(k=>IDEAS[k].name+' ('+fmt(IDEAS[k].cost)+')').join(', '));
+
+  heading('Round 2 — After Leadership Culture Review');
+  body([...state.r2selected].map(k=>displayName(k)+' ('+fmt(costOf(k))+')').join(', '));
+
+  heading('Round 3 — Trimmed to $9,000');
+  body([...state.r3selected].map(k=>displayName(k)+' ('+fmt(costOf(k))+')').join(', '));
+
+  heading('Round 4 — Final Recommendation');
+  body(state.finalPick ? displayName(state.finalPick) : '—');
+  label('Rationale');
+  body(document.getElementById('rationale').value);
+
+  heading('Reflection');
+  label('1. Idea-sourcing categories: what survived, what got cut, and why');
+  body(document.getElementById('q1').value);
+  label('2. Which constraint (budget, culture, mandate, time) changed your thinking most');
+  body(document.getElementById('q2').value);
+  label('3. Application to OGL idea sourcing');
+  body(document.getElementById('q3').value);
+
+  doc.save('OGL_Idea_Triage_Results.pdf');
+}
+</script>
+</body>
+</html>
